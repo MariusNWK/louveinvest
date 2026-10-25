@@ -1,0 +1,14 @@
+{
+  "name": "date",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "dayjs": "^1.11.13"
+  },
+  "devDependencies": {
+    "tsconfig": "*",
+    "typescript": "^5"
+  }
+}

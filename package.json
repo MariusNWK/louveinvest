@@ -1,0 +1,25 @@
+{
+  "name": "louveinvest",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build --color",
+    "start": "turbo run start",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "db:generate": "turbo run db:generate",
+    "db:push": "turbo run db:push"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.2",
+    "@types/node": "^20",
+    "turbo": "^2.9.9",
+    "typescript": "^5"
+  },
+  "packageManager": "yarn@1.22.22"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "my-functions",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "my-zod": "*"
+  },
+  "devDependencies": {
+    "tsconfig": "*",
+    "typescript": "^5"
+  }
+}

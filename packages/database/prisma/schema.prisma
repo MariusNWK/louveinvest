@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ManagementCompany {
+  PRAEMIA_REIM
+}
+
+model Scpi {
+  id                        String                 @id @default(uuid())
+  name                      String                 @unique
+  managementCompany         ManagementCompany      @default(PRAEMIA_REIM) @map("management_company")
+  lastExecutionPrice        Float                  @map("last_execution_price")
+  lastBuyerPrice            Float                  @map("last_buyer_price")
+  realizationValue          Float?                 @map("realization_value")
+  capitalization            Float?
+  distributionRate          Float?                 @map("distribution_rate")
+  financialOccupancyRate    Float?                 @map("financial_occupancy_rate")
+  previousYearDividend      Float                  @map("previous_year_dividend")
+  dividendYear              Int                    @map("dividend_year")
+  dividendSource            String                 @map("dividend_source")
+  transferCommissionRateHt  Float                  @map("transfer_commission_rate_ht")
+  transferCommissionRateTtc Float                  @map("transfer_commission_rate_ttc")
+  registrationTaxRate       Float                  @map("registration_tax_rate")
+  fixedFolderFeeHt          Float                  @map("fixed_folder_fee_ht")
+  fixedFolderFeeTtc         Float                  @map("fixed_folder_fee_ttc")
+  nextConfrontationDate     String?                @map("next_confrontation_date")
+  orderDeadlineDate         String?                @map("order_deadline_date")
+  marketUpdatedAtLabel      String?                @map("market_updated_at_label")
+  scrapedAt                 DateTime               @default(now()) @map("scraped_at")
+  createdAt                 DateTime               @default(now()) @map("created_at")
+  updatedAt                 DateTime               @updatedAt @map("updated_at")
+  orderBookEntries          OrderBookEntry[]
+  confrontations            ConfrontationHistory[]
+
+  @@map("scpis")
+}
+
+model OrderBookEntry {
+  id          String   @id @default(uuid())
+  scpiId      String   @map("scpi_id")
+  side        String
+  rank        Int
+  ordersCount Int      @map("orders_count")
+  partsCount  Int      @map("parts_count")
+  sellerPrice Float    @map("seller_price")
+  buyerPrice  Float?   @map("buyer_price")
+  createdAt   DateTime @default(now()) @map("created_at")
+  scpi        Scpi     @relation(fields: [scpiId], references: [id], onDelete: Cascade)
+
+  @@index([scpiId, side, rank])
+  @@map("order_book_entries")
+}
+
+model ConfrontationHistory {
+  id                String   @id @default(uuid())
+  scpiId            String   @map("scpi_id")
+  confrontationDate String   @map("confrontation_date")
+  exchangedParts    Int      @map("exchanged_parts")
+  sellerPrice       Float    @map("seller_price")
+  buyerPrice        Float    @map("buyer_price")
+  sortOrder         Int      @map("sort_order")
+  createdAt         DateTime @default(now()) @map("created_at")
+  scpi              Scpi     @relation(fields: [scpiId], references: [id], onDelete: Cascade)
+
+  @@index([scpiId, sortOrder])
+  @@map("confrontation_histories")
+}
+

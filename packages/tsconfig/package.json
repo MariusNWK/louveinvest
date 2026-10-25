@@ -1,0 +1,17 @@
+{
+  "name": "tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "base.json",
+    "cn.json",
+    "database.json",
+    "date.json",
+    "my-components.json",
+    "my-functions.json",
+    "my-variables.json",
+    "my-zod.json",
+    "nextjs.json",
+    "ui.json"
+  ]
+}

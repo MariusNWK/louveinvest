@@ -1,0 +1,14 @@
+{
+  "name": "cn",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "classnames": "^2.5.1"
+  },
+  "devDependencies": {
+    "tsconfig": "*",
+    "typescript": "^5"
+  }
+}

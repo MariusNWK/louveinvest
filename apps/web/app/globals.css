@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@config "../../../packages/tailwind-config/tailwind.config.js";
+@source "../../../packages/ui/**/*.{ts,tsx}";
+@source "../../../packages/my-components/**/*.{ts,tsx}";
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  @apply bg-louve-bg text-louve-navy;
+  font-family: var(--font-space-grotesk), system-ui, -apple-system, sans-serif;
+}
+
+button {
+  cursor: pointer;
+}

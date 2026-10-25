@@ -1,0 +1,27 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "cn": "*",
+    "form": "*",
+    "my-functions": "*",
+    "my-variables": "*",
+    "my-zod": "*",
+    "react-feather": "^2.0.10"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwind-config": "*",
+    "tailwindcss": "^4",
+    "tsconfig": "*",
+    "typescript": "^5"
+  }
+}

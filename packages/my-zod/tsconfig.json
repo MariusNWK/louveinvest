@@ -1,0 +1,4 @@
+{
+  "extends": "tsconfig/my-zod.json",
+  "include": ["."]
+}

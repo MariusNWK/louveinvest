@@ -1,0 +1,15 @@
+{
+  "name": "my-zod",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "tsconfig": "*",
+    "typescript": "^5"
+  }
+}
