@@ -1,10 +1,49 @@
+import { getOrSyncScpiMarketData } from "@utils/syncScpiMarketData";
+import { formatDateTime } from "date";
+import {
+  ConfrontationHistorySection,
+  MarketKpiGrid,
+  OrderBookSection,
+  ScpiHeroBanner,
+  ScpiSourceFooter,
+} from "my-components";
+import { RefreshMarketButtonWrapper } from "../../wrappers/RefreshMarketButtonWrapper";
+import { refreshPrimopierreMarketAction } from "./actions";
+
 export const dynamic = "force-dynamic";
 
-export default function OpportunitiesPage() {
+export interface IOpportunitiesPageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function OpportunitiesPage(props: IOpportunitiesPageProps) {
+  void props;
+
+  const scpiData = await getOrSyncScpiMarketData("PRIMOPIERRE");
+
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-slate-900">Marché Secondaire des SCPI</h1>
-      <p className="text-slate-600">Initialisation du tableau de bord...</p>
+      <ScpiHeroBanner
+        scpi={scpiData}
+        refreshActionSlot={
+          <RefreshMarketButtonWrapper
+            onRefresh={refreshPrimopierreMarketAction}
+            managementCompany={scpiData.managementCompany}
+          />
+        }
+      />
+
+      <MarketKpiGrid scpi={scpiData} />
+
+      <OrderBookSection
+        entries={scpiData.orderBookEntries}
+        managementCompany={scpiData.managementCompany}
+        proportionalFeeRatePercent={scpiData.transferCommissionRateTtc + scpiData.registrationTaxRate}
+      />
+
+      <ConfrontationHistorySection confrontations={scpiData.confrontations} />
+
+      <ScpiSourceFooter scpi={scpiData} lastSyncLabel={formatDateTime(scpiData.scrapedAt)} />
     </div>
   );
 }

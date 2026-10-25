@@ -6,3 +6,8 @@ export * from "./src/layout/sidebar/priv/interfaces";
 export * from "./src/layout/sidebar/Sidebar";
 export * from "./src/layout/sidebar/SidebarButton";
 export * from "./src/layout/sidebar/SidebarWrapper";
+export * from "./src/secondary-market/ConfrontationHistorySection";
+export * from "./src/secondary-market/MarketKpiGrid";
+export * from "./src/secondary-market/OrderBookSection";
+export * from "./src/secondary-market/ScpiHeroBanner";
+export * from "./src/secondary-market/ScpiSourceFooter";

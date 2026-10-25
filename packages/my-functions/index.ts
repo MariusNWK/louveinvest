@@ -1,3 +1,8 @@
+import {
+  type IOrderBookEntryItem,
+  type IOrderBookSummaryMetrics,
+} from "my-zod";
+
 const euroFormatter = new Intl.NumberFormat("fr-FR", {
   style: "currency",
   currency: "EUR",
@@ -55,4 +60,36 @@ export function formatExactPercentage(value: number, showPositiveSign = false): 
     return `+${formattedNumber} %`;
   }
   return `${formattedNumber} %`;
+}
+
+export function calculateDiscountPercentage(currentPrice: number, referenceValue: number | null): number | null {
+  if (!referenceValue || referenceValue <= 0) {
+    return null;
+  }
+  return ((currentPrice - referenceValue) / referenceValue) * 100;
+}
+
+export function calculateOrderBookSummary(entries: IOrderBookEntryItem[]): IOrderBookSummaryMetrics {
+  const buyEntries = entries.filter((entry) => entry.side === "BUY").sort((first, second) => first.rank - second.rank);
+  const sellEntries = entries
+    .filter((entry) => entry.side === "SELL")
+    .sort((first, second) => first.rank - second.rank);
+
+  const totalBuyOrders = buyEntries.reduce((accumulator, entry) => accumulator + entry.ordersCount, 0);
+  const totalBuyParts = buyEntries.reduce((accumulator, entry) => accumulator + entry.partsCount, 0);
+  const totalSellOrders = sellEntries.reduce((accumulator, entry) => accumulator + entry.ordersCount, 0);
+  const totalSellParts = sellEntries.reduce((accumulator, entry) => accumulator + entry.partsCount, 0);
+
+  const firstBuyEntry = buyEntries[0];
+  const firstSellEntry = sellEntries[0];
+
+  return {
+    totalBuyOrders,
+    totalBuyParts,
+    highestBuyerPrice: firstBuyEntry?.buyerPrice ?? null,
+    highestBuySellerPrice: firstBuyEntry?.sellerPrice ?? null,
+    totalSellOrders,
+    totalSellParts,
+    lowestSellerPrice: firstSellEntry?.sellerPrice ?? null,
+  };
 }
