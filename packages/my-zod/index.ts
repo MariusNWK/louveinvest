@@ -163,3 +163,98 @@ export interface IScpiWithMarketRelations {
   marketUpdatedAtLabel: string | null;
   scrapedAt: Date;
   orderBookEntries: IOrderBookEntryItem[];
+  confrontations: IConfrontationHistoryItem[];
+}
+
+export interface IOrderBookSummaryMetrics {
+  totalBuyOrders: number;
+  totalBuyParts: number;
+  highestBuyerPrice: number | null;
+  highestBuySellerPrice: number | null;
+  totalSellOrders: number;
+  totalSellParts: number;
+  lowestSellerPrice: number | null;
+}
+
+export interface IYieldBreakdownMetrics {
+  executionPrice: number;
+  transferCommissionPerPart: number;
+  registrationTaxPerPart: number;
+  totalProportionalFeeRate: number;
+  totalProportionalFeesPerPart: number;
+  buyerPricePerPart: number;
+  annualGrossDividendPerPart: number;
+  yieldFeeIncludedPercent: number;
+  netSellerYieldPercent: number;
+}
+
+export interface IInvestmentYieldSimulationInput {
+  acquisitionPricePerPart: number;
+  partsCount: number;
+  fixedFolderFeeTtc: number;
+  annualGrossDividendPerPart: number;
+  transferCommissionRateTtc: number;
+  registrationTaxRate: number;
+}
+
+export interface IInvestmentYieldSimulationResult {
+  partsCount: number;
+  acquisitionPricePerPart: number;
+  netSellerTotalAmount: number;
+  transferCommissionTotalAmount: number;
+  registrationTaxTotalAmount: number;
+  proportionalFeesTotalAmount: number;
+  fixedFolderFeeTtc: number;
+  totalFeesAmount: number;
+  totalInvestmentWithoutFixedFees: number;
+  totalInvestmentWithFixedFees: number;
+  allInCostPerPart: number;
+  fixedFeePerPart: number;
+  annualGrossDividendsTotal: number;
+  yieldWithoutFixedFeesPercent: number;
+  yieldWithFixedFeesPercent: number;
+  fixedFeeYieldImpactPercent: number;
+}
+
+export type TConfrontationTieBreaker = "UNIQUE_MAX_VOLUME" | "MIN_IMBALANCE" | "CLOSEST_TO_LAST_PRICE" | "NO_CROSSING";
+
+export interface IConfrontationPriceLevel {
+  sellerPrice: number;
+  buyerPrice: number;
+  buyPartsAtPrice: number;
+  sellPartsAtPrice: number;
+  cumulativeBuyParts: number;
+  cumulativeSellParts: number;
+  exchangeableParts: number;
+  unmatchedParts: number;
+  distanceFromLastExecution: number;
+  yieldFeeIncludedPercent: number;
+  isOptimalEquilibrium: boolean;
+  isTiedOnMaxVolume: boolean;
+}
+
+export interface IConfrontationEstimationResult {
+  hasCrossing: boolean;
+  estimatedSellerPrice: number | null;
+  estimatedBuyerPrice: number | null;
+  estimatedExchangedParts: number;
+  estimatedTotalSellerVolumeEuro: number;
+  estimatedTotalBuyerVolumeEuro: number;
+  estimatedYieldFeeIncludedPercent: number | null;
+  priceEvolutionVsLastPercent: number | null;
+  unmatchedImbalanceParts: number;
+  tieBreakerApplied: TConfrontationTieBreaker;
+  levels: IConfrontationPriceLevel[];
+}
+
+export type TYieldCurveMarkerType = "ESTIMATED" | "LAST_EXECUTION" | "STANDARD";
+
+export interface IYieldCurveDataPoint {
+  sellerPrice: number;
+  buyerPrice: number;
+  yieldFeeIncludedPercent: number;
+  yieldWithFixedFeesPercent: number;
+  markerType: TYieldCurveMarkerType;
+  markerLabel?: string;
+}
+

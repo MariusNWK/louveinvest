@@ -11,3 +11,6 @@ export * from "./src/secondary-market/MarketKpiGrid";
 export * from "./src/secondary-market/OrderBookSection";
 export * from "./src/secondary-market/ScpiHeroBanner";
 export * from "./src/secondary-market/ScpiSourceFooter";
+export * from "./src/secondary-market/ConfrontationEstimationSection";
+export * from "./src/secondary-market/EstimationTabsContainer";
+export * from "./src/secondary-market/YieldFeeIncludedSection";
