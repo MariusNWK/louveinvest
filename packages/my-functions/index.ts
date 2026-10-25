@@ -5,10 +5,16 @@ import {
   type IInvestmentYieldSimulationResult,
   type IOrderBookEntryItem,
   type IOrderBookSummaryMetrics,
+  type IPurchasePreparedEmail,
+  type IPurchasePricePreset,
   type IScpiWithMarketRelations,
   type IYieldBreakdownMetrics,
   type IYieldCurveDataPoint,
+  managementCompanyToLabel,
+  purchaseEmailSchema,
+  scpiNameToLabel,
   type TConfrontationTieBreaker,
+  type TPurchaseEmailFormData,
   type TYieldCurveMarkerType,
 } from "my-zod";
 
@@ -411,4 +417,109 @@ export interface IBuildPurchasePreparedEmailParams {
   formData: TPurchaseEmailFormData;
   simulation: IInvestmentYieldSimulationResult;
   recipientEmail: string;
+}
+
+export function normalizePurchaseFormData(rawValues: Partial<TPurchaseEmailFormData>): TPurchaseEmailFormData {
+  return {
+    firstName: rawValues.firstName ?? "",
+    lastName: rawValues.lastName ?? "",
+    isExistingAssociate: Boolean(rawValues.isExistingAssociate),
+    associateNumber: rawValues.associateNumber ?? "",
+    partsCount:
+      typeof rawValues.partsCount === "number" && !Number.isNaN(rawValues.partsCount) ? rawValues.partsCount : 0,
+    maxPricePerPart:
+      typeof rawValues.maxPricePerPart === "number" && !Number.isNaN(rawValues.maxPricePerPart)
+        ? rawValues.maxPricePerPart
+        : 0,
+  };
+}
+
+export function buildPurchasePreparedEmail(params: IBuildPurchasePreparedEmailParams): IPurchasePreparedEmail {
+  const scpi = params.scpi;
+  const formData = params.formData;
+  const simulation = params.simulation;
+  const managementCompanyLabel = managementCompanyToLabel[scpi.managementCompany];
+  const scpiLabel = scpiNameToLabel[scpi.name];
+
+  const trimmedFirstName = formData.firstName.trim();
+  const trimmedLastName = formData.lastName.trim();
+  const trimmedAssociateNumber = formData.associateNumber.trim();
+
+  const displayFirstName = trimmedFirstName || "[Prénom]";
+  const displayLastName = trimmedLastName.toUpperCase() || "[NOM]";
+  const fullName = `${displayFirstName} ${displayLastName}`;
+
+  const safePartsCount = formData.partsCount >= 1 ? Math.floor(formData.partsCount) : 0;
+  const safeMaxPrice = formData.maxPricePerPart > 0 ? formData.maxPricePerPart : 0;
+  const partsUnitLabel = safePartsCount > 1 ? "parts" : "part";
+
+  const proportionalMultiplier = 1 + (scpi.transferCommissionRateTtc + scpi.registrationTaxRate) / 100;
+  const buyerPricePerPart = safeMaxPrice * proportionalMultiplier;
+
+  const associateStatusLine = formData.isExistingAssociate
+    ? `Oui — Numéro d'associé : ${trimmedAssociateNumber || "[Numéro d'associé à compléter]"}`
+    : `Non (nouvel investisseur sur la ${scpiLabel})`;
+
+  const subject = `Projet d'achat sur le marché secondaire — ${scpiLabel} — ${fullName} (${formatInteger(safePartsCount)} ${partsUnitLabel})`;
+
+  const bodyLines = [
+    `À l'attention de ${managementCompanyLabel} — Service Associés / Marché Secondaire`,
+    "",
+    "Madame, Monsieur,",
+    "",
+    `Je vous contacte afin de vous faire part de mon projet d'acquisition de parts de la ${scpiLabel} sur le marché secondaire et de recevoir la documentation nécessaire à l'enregistrement de mon ordre d'achat.`,
+    "",
+    "Vous trouverez ci-dessous le récapitulatif des informations relatives à mon projet d'achat :",
+    "",
+    "1. IDENTITÉ DU DONNEUR D'ORDRE",
+    `• Prénom : ${displayFirstName}`,
+    `• Nom : ${displayLastName}`,
+    `• Déjà associé de la ${scpiLabel} : ${associateStatusLine}`,
+    "",
+    "2. CARACTÉRISTIQUES DE L'ORDRE D'ACHAT SOUHAITÉ",
+    `• SCPI concernée : ${scpiLabel} (${managementCompanyLabel})`,
+    `• Nombre de parts souhaité : ${formatInteger(safePartsCount)} ${partsUnitLabel}`,
+    `• Prix maximum proposé par part (hors frais / net vendeur) : ${formatEuroPrice(safeMaxPrice)}`,
+    `• Prix maximum acquéreur correspondant (frais proportionnels inclus) : ${formatEuroPrice(buyerPricePerPart)} / part`,
+    "",
+    "3. ESTIMATION FINANCIÈRE INDICATIVE DE L'OPÉRATION",
+    `• Montant total hors frais (net vendeur) : ${formatEuroPrice(simulation.netSellerTotalAmount)}`,
+    `• Commission de cession (${formatExactPercentage(scpi.transferCommissionRateTtc)} TTC) : ${formatEuroPrice(simulation.transferCommissionTotalAmount)}`,
+    `• Droits d'enregistrement (${formatExactPercentage(scpi.registrationTaxRate)}) : ${formatEuroPrice(simulation.registrationTaxTotalAmount)}`,
+    `• Coût total estimé hors frais fixes de dossier : ${formatEuroPrice(simulation.totalInvestmentWithoutFixedFees)}`,
+    ...(simulation.fixedFolderFeeTtc > 0
+      ? [
+          `• Forfait de frais fixes par dossier (TTC) : ${formatEuroPrice(simulation.fixedFolderFeeTtc)}`,
+          `• Coût total estimé frais fixes inclus : ${formatEuroPrice(simulation.totalInvestmentWithFixedFees)}`,
+        ]
+      : []),
+    ...(scpi.nextConfrontationDate
+      ? [
+          "",
+          `Échéance visée : prochaine confrontation du ${scpi.nextConfrontationDate}${
+            scpi.orderDeadlineDate ? ` (date limite de réception des ordres : ${scpi.orderDeadlineDate})` : ""
+          }.`,
+        ]
+      : []),
+    "",
+    "Je vous remercie par avance de bien vouloir m'indiquer les modalités pratiques de transmission et de signature du mandat d'achat correspondant.",
+    "",
+    "Dans l'attente de votre retour, je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.",
+    "",
+    fullName,
+    ...(formData.isExistingAssociate && trimmedAssociateNumber ? [`Associé n° ${trimmedAssociateNumber}`] : []),
+  ];
+
+  const body = bodyLines.join("\n");
+  const mailtoHref = `mailto:${params.recipientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const validationResult = purchaseEmailSchema.safeParse(formData);
+
+  return {
+    recipientName: `${managementCompanyLabel} — Service Associés / Marché Secondaire`,
+    recipientEmail: params.recipientEmail,
+    subject,
+    body,
+    mailtoHref,
+    isComplete: validationResult.success,
+  };
 }

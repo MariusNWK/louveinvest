@@ -1,0 +1,5 @@
+{
+  "extends": "tsconfig/form.json",
+  "include": ["./src", "index.ts", "interfaces.ts"],
+  "exclude": ["dist", "build", "node_modules"]
+}

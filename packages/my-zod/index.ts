@@ -258,3 +258,50 @@ export interface IYieldCurveDataPoint {
   markerLabel?: string;
 }
 
+export const purchaseEmailSchema = z
+  .object({
+    firstName: z.string().trim().min(1, "Veuillez renseigner votre prénom.").max(80, "80 caractères maximum."),
+    lastName: z.string().trim().min(1, "Veuillez renseigner votre nom.").max(80, "80 caractères maximum."),
+    isExistingAssociate: z.boolean(),
+    associateNumber: z.string().trim().max(50, "50 caractères maximum."),
+    partsCount: z
+      .number({
+        required_error: "Veuillez saisir un nombre de parts.",
+        invalid_type_error: "Veuillez saisir un nombre entier de parts.",
+      })
+      .int("Le nombre de parts doit être un nombre entier.")
+      .min(1, "Le nombre de parts souhaité doit être d'au moins 1 part."),
+    maxPricePerPart: z
+      .number({
+        required_error: "Veuillez saisir un prix maximum par part.",
+        invalid_type_error: "Veuillez saisir un prix valide.",
+      })
+      .positive("Le prix maximum proposé par part doit être strictement supérieur à 0 €."),
+  })
+  .superRefine((data, ctx) => {
+    if (data.isExistingAssociate && data.associateNumber.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["associateNumber"],
+        message: "Le numéro d'associé est obligatoire lorsque vous êtes déjà associé de la SCPI.",
+      });
+    }
+  });
+
+export type TPurchaseEmailFormData = z.infer<typeof purchaseEmailSchema>;
+
+export interface IPurchasePricePreset {
+  id: string;
+  label: string;
+  sublabel: string;
+  price: number;
+}
+
+export interface IPurchasePreparedEmail {
+  recipientName: string;
+  recipientEmail: string;
+  subject: string;
+  body: string;
+  mailtoHref: string;
+  isComplete: boolean;
+}

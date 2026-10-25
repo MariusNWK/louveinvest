@@ -1,0 +1,22 @@
+{
+  "name": "form",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.1",
+    "my-variables": "*",
+    "my-zod": "*",
+    "react-hook-form": "^7.62.0"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "tsconfig": "*",
+    "typescript": "^5"
+  }
+}
